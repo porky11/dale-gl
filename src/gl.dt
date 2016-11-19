@@ -102,21 +102,16 @@
 
 ;;cfun
 
-(def glEnable (fn extern-c void ((a capability))))
-(def glDisable (fn extern-c void ((a capability))))
+(defc enable extern glEnable  void ((a capability)))
+(defc disable extern glDisable void ((a capability)))
 
-(def glDrawElements (fn extern-c void ((mode uint) (first int) (count int) (indices (p void)))))
-(def glVertexPointer (fn extern-c void ((size int) (type uint) (stride int) (ptr (const (p void))))))
+(defc draw-elements extern glDrawElements void ((mode uint) (first int) (count int) (indices (p void))))
+(defc vertex-pointer extern glVertexPointer void ((size int) (type uint) (stride int) (ptr (const (p void)))))
 
-(def glCreateShader (fn extern-c uint ((shader-type uint))))
 (def glGetShaderSource (fn extern-c void ((shader uint) (buf-size int) (lenght (p int)) (source (p char)))))
 (def glShaderSource (fn extern-c void ((shader uint) (count int) (source (p (p (const char)))) (lenght (p int)))))
-(def glCompileShader (fn extern-c void ((shader uint))))
 (def glGetShaderiv (fn extern-c void ((shader uint) (pname uint) (params (p int)))))
 
-(def glCreateProgram (fn extern-c uint (void)))
-
-(def glGetUniformLocation (fn extern-c int ((program uint) (name (p (const char))))))
 
 (def glUniform1f (fn extern-c void ((location int) (v0 float))))
 (def glUniform2f (fn extern-c void ((location int) (v0 float) (v1 float))))
@@ -213,19 +208,15 @@
   (def uniform (fn extern void ((location Location) (value (p (array-of 4 uint))))
     (glUniform4uiv (@: location value) 1 (cast value (p uint)))))
 
-  (def get-uniform-location (fn extern Location ((program Program) (name (p (const char))))
-    (Location ((value (glGetUniformLocation (@: program value) name))))))
+  (defc get-uniform-location extern glGetUniformLocation Location ((program Program) (name (p (const char)))))
 
 
-  (def create-shader (fn extern Shader ((shader-type shader-type))
-    (Shader ((value (glCreateShader (value shader-type)))))))
+  (defc create-shader extern glCreateShader Shader ((shader-type shader-type)))
   (def shader-source (fn extern void ((shader Shader) (str (p (const char))))
     (glShaderSource (@: shader value) 1 (# str) (nullptr int))))
-  (def compile-shader (fn extern void ((shader Shader))
-    (glCompileShader (@: shader value))))
+  (defc compile-shader extern glCompileShader void ((shader Shader)))
 
-  (def create-program (fn extern Program (void)
-    (Program ((value (glCreateProgram))))))
+  (defc create-program extern glCreateProgram Program (void))
 
   (defc attach-shader extern glAttachShader void ((program Program) (shader Shader)))
   (ignore def attach-shader (macro extern ((program Program) (shader Shader) ...)
@@ -242,7 +233,8 @@
   (defc use-program extern glUseProgram void ((program Program)))
 
   (defc clear extern glClear void ((mask clear-buffer-mask)))
-  (defc vertex extern glVertex3f void ((x float) (y float) (z float)))
+  (defc-multi vertex extern
+    (glVertex3f void ((x float) (y float) (z float))))
   (defc begin extern glBegin void ((mode primitive)))
   (defc end extern glEnd void (void))
   (defc enable-client-state extern glEnableClientState void ((array array)))
