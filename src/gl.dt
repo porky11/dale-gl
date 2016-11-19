@@ -100,6 +100,7 @@
 
 (import macros)
 
+(using-namespace std.macros
 ;;cfun
 
 (defc enable extern glEnable  void ((a capability)))
@@ -112,6 +113,33 @@
 (def glShaderSource (fn extern-c void ((shader uint) (count int) (source (p (p (const char)))) (lenght (p int)))))
 (def glGetShaderiv (fn extern-c void ((shader uint) (pname uint) (params (p int)))))
 
+(def Texture (struct extern ((value uint))))
+(def glGenTextures (fn extern-c void ((a int) (tex (p int)))))
+(def gen-textures (macro extern ((a int))
+  (def gensym (var auto \ (make-gensym-var-node mc)))
+  (qq do
+    (def (uq gensym) (var auto (array-of (uq a) Texture)))
+    (glGenTextures a (cast (uq gensym) (p int)))
+    (move (uq gensym)))))
+
+#|
+(def-enum texture-type ((texture-1d 0x0DE0)
+                        (texture-1d 0x0DE1)
+                        (texture-3d 0x806F)
+                        (texture-cube-map 0x8513)))
+
+(defc-enum bind-texture extern glBindTexture ((a texture-type) (tex texture)))
+
+(def-enum texture-2d-type ((texture-2d 0x0DE1)
+                           (proxy-texture-2d 0x8064)
+                           ;texture-1d-array
+                           ;proxy-texture-1d-array
+                           ;texture-rectangle
+                           ;proxy-texture-rectangle
+                           (texture-cube-map 0x8513)
+
+(defc tex-image-2d extern glTexImage2D ((target texture-mapping) (level glint)
+|#
 
 (def glUniform1fv (fn extern-c void ((location int) (count uint) (value (const (p float))))))
 (def glUniform2fv (fn extern-c void ((location int) (count uint) (value (const (p float))))))
@@ -126,13 +154,11 @@
 (def glUniform3uiv (fn extern-c void ((location int) (count uint) (value (const (p uint))))))
 (def glUniform4uiv (fn extern-c void ((location int) (count uint) (value (const (p uint))))))
 
-
 ;;;types
   (def Shader (struct extern ((value uint))))
   (def Program (struct extern ((value uint))))
   (def Location (struct extern ((value int))))
 
-(using-namespace std.macros
 
 (defc-multi uniform extern
   (glUniform1f void ((location Location) (v0 float)))

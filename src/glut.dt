@@ -1,35 +1,12 @@
 (module glut)
 
+(import util)
+
 (import stdlib)
 (import macros-core)
 (import macros)
 (import enum)
 
-;;c-functions
-(def glutInit
-  (fn extern-c void ((argc (p int)) (argv (p (p char))))))
-(def glutInitWindowPosition
-  (fn extern-c void ((x int) (y int))))
-(def glutInitWindowSize
-  (fn extern-c void ((width int) (height int))))
-(def glutCreateWindow
-  (fn extern-c int ((title (p (const char))))))
-(def glutDisplayFunc
-  (fn extern-c void ((callback (p (fn void (void)))))))
-(def glutIdleFunc
-  (fn extern-c void ((callback (p (fn void (void)))))))
-(def glutTimerFunc
-  (fn extern-c void ((time int) (callback (p (fn void ((a int))))) (some int))))
-(def glutMainLoop
-  (fn extern-c void (void)))
-(def glutInitDisplayMode
-  (fn extern-c void ((mode uint))))
-(def glutPostRedisplay
-  (fn extern-c void (void)))
-(def glutKeyboardFunc
-  (fn extern-c void ((func (p (fn void ((key char) (x int) (y int))))))))
-(def glutKeyboardUpFunc
-  (fn extern-c void ((func (p (fn void ((key char) (x int) (y int))))))))
 
 
 (namespace glut
@@ -53,34 +30,18 @@
                        (multisample 0x0080)
                        (stereo 0x0100)
                        (luminance 0x0200)))
-  (def init
-    (fn extern void ((argc (p int)) (argv (p (p char))))
-      (glutInit argc argv)))
-  (def init-window-position
-    (fn extern void ((x int) (y int))
-      (glutInitWindowPosition x y)))
-  (def init-window-size
-    (fn extern void ((width int) (height int))
-      (glutInitWindowSize width height)))
-  (def create-window
-    (fn extern int ((title (p (const char))))
-      (glutCreateWindow title)))
-  (using-namespace std.macros
-  (def def-glut-func (macro intern (name glut-name)
-    (qq def (uq name)
-      (macro extern (rest)
-      (using-namespace std.macros
-        (def list (var auto \ (get-varargs-list mc (arg-count mc) rest)))
-            (qq (uq glut-name) (fn void (uq (uql list)))))))))
-  (def-glut-func idle-func glutIdleFunc)
-
-  (def-glut-func display-func glutDisplayFunc)
-  )
-  (def main-loop
-    (fn extern void (void)
-      (glutMainLoop)))
-  (def init-display-mode (fn extern void ((mode mode))
-    (glutInitDisplayMode (value mode))))
+  (defc init extern glutInit void ((argc (p int)) (argv (p (p char)))))
+  (defc init-window-position extern glutInitWindowPosition void ((x int) (y int)))
+  (defc init-window-size extern glutInitWindowSize void ((width int) (height int)))
+  (defc create-window extern glutCreateWindow int ((title (p (const char)))))
+  (defc display-func extern glutDisplayFunc void ((callback (p (fn void (void))))))
+  (defc idle-func extern glutIdleFunc void ((callback (p (fn void (void))))))
+  (defc timer-func extern glutTimerFunc void ((time int) (callback (p (fn void ((a int))))) (some int)))
+  (defc main-loop extern glutMainLoop void (void))
+  (defc init-display-mode extern glutInitDisplayMode void ((mode mode)))
+  (defc post-redisplay extern glutPostRedisplay void (void))
+  (defc keyboard-func extern glutKeyboardFunc void ((func (p (fn void ((key char) (x int) (y int)))))))
+  (defc keyboard-up-func extern glutKeyboardUpFunc void ((func (p (fn void ((key char) (x int) (y int)))))))
 )
 
 
