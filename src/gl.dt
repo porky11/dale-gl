@@ -115,7 +115,6 @@
 (def glGetShaderiv (fn extern-c void ((shader uint) (pname uint) (params (p int)))))
 
 (def glCreateProgram (fn extern-c uint (void)))
-(def glAttachShader (fn extern-c void ((program uint) (shader uint))))
 
 (def glGetUniformLocation (fn extern-c int ((program uint) (name (p (const char))))))
 
@@ -228,8 +227,7 @@
   (def create-program (fn extern Program (void)
     (Program ((value (glCreateProgram))))))
 
-  (def attach-shader (fn extern void ((program Program) (shader Shader))
-    (glAttachShader (@: program value) (@: shader value))))
+  (defc attach-shader extern glAttachShader void ((program Program) (shader Shader)))
   (ignore def attach-shader (macro extern ((program Program) (shader Shader) ...)
     (qq do (attach-shader (uq program) (uq shader))
            (attach-shader (uq program) (uql (get-varargs-list (- (arg-count mc) 2)))))))
