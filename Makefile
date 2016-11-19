@@ -2,8 +2,6 @@
 
 FLAGS=-M../dale-extensions
 
-
-
 all: libgl.dtm libglut.dtm
 
 libgl.dtm: src/gl.dt

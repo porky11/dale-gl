@@ -1,6 +1,7 @@
 (module gl)
 
-(import enum)
+(import bitset-enum)
+
 (import util)
 
 ;;;constants
@@ -34,7 +35,7 @@
                        (all-attrib 0xFFFFFFFF)))
 |#
     
-  (def-enum clear-buffer-mask
+  (def-bitset-enum clear-buffer-mask
     extern uint
       ((depth 0x100)
        (accum 0x200)
@@ -94,28 +95,16 @@
                        double))
   (def-enum array
     extern uint ((vertex-array 0x8074) normal-array color-array index-array texture-coord-array edge-flag-array))
-)
+
 
 
 (import macros)
 
 ;;cfun
 
-(namespace gl
-(def glClear    (fn extern-c void ((mask uint))))
-(def glBegin    (fn extern-c void ((mode uint))))
-(def glVertex3f (fn extern-c void ((x float)
-                                   (y float)
-                                   (z float))))
-
 (def glEnable (fn extern-c void ((a capability))))
 (def glDisable (fn extern-c void ((a capability))))
-(def glEnd      (fn extern-c void (void)))
-(def glFlush    (fn extern-c void (void)))
 
-(def glEnableClientState (fn extern-c void ((array array))))
-(def glDisableClientState (fn extern-c void (void)))
-(def glDrawArrays (fn extern-c void ((mode uint) (first int) (count int))))
 (def glDrawElements (fn extern-c void ((mode uint) (first int) (count int) (indices (p void)))))
 (def glVertexPointer (fn extern-c void ((size int) (type uint) (stride int) (ptr (const (p void))))))
 
@@ -127,8 +116,6 @@
 
 (def glCreateProgram (fn extern-c uint (void)))
 (def glAttachShader (fn extern-c void ((program uint) (shader uint))))
-(def glLinkProgram (fn extern-c void ((program uint))))
-(def glUseProgram (fn extern-c void ((program uint))))
 
 (def glGetUniformLocation (fn extern-c int ((program uint) (name (p (const char))))))
 
@@ -158,17 +145,14 @@
 (def glUniform3uiv (fn extern-c void ((location int) (count uint) (value (const (p uint))))))
 (def glUniform4uiv (fn extern-c void ((location int) (count uint) (value (const (p uint))))))
 
-)
 
 ;;;types
-(namespace gl
   (def Shader (struct extern ((value uint))))
   (def Program (struct extern ((value uint))))
   (def Location (struct extern ((value int))))
-)
 
-(namespace gl
 (using-namespace std.macros
+
 
   (def uniform (fn extern void ((location Location) (v0 float))
     (glUniform1f (@: location value) v0)))
@@ -256,26 +240,16 @@
       (qq do (def (uq name) (var auto int 0))
              (glGetShaderiv (@: (uq shader) value) (value (uq pname)) (# (uq name)))
              (move (uq name))))))
-  (def link-program (fn extern void ((program Program))
-    (glLinkProgram (@: program value))))
-  (def use-program (fn extern void ((program Program))
-    (glUseProgram (@: program value))))
+  (defc link-program extern glLinkProgram void ((program Program)))
+  (defc use-program extern glUseProgram void ((program Program)))
 
-
-  (def clear (fn extern void ((mask clear-buffer-mask))
-    (glClear (value mask))))
-  (def begin (fn extern void ((mode primitive))
-    (glBegin (value mode))))
-  (def vertex (fn extern void ((x float) (y float) (z float))
-    (glVertex3f x y z)))
-  (def end (fn extern void (void)
-    (glEnd)))
-  (def enable-client-state (fn extern void ((array array))
-    (glEnableClientState array)))
-  (def disable-client-state (fn extern void (void)
-    (glDisableClientState)))
-  (def draw-arrays (fn extern void ((mode primitive) (first int) (count int))
-    (glDrawArrays (value mode) first count)))
+  (defc clear extern glClear void ((mask clear-buffer-mask)))
+  (defc vertex extern glVertex3f void ((x float) (y float) (z float)))
+  (defc begin extern glBegin void ((mode primitive)))
+  (defc end extern glEnd void (void))
+  (defc enable-client-state extern glEnableClientState void ((array array)))
+  (defc disable-client-state extern glDisableClientState void (void))
+  (defc draw-arrays extern glDrawArrays void ((mode primitive) (first int) (count int)))
   (def vertex-pointer (macro extern ((size int) (type type) (stride int) ptr)
     (qq glVertexPointer (uq size) (value (uq type)) (uq stride) (cast (uq ptr) (p void)))))
    #|
@@ -285,6 +259,5 @@
            (disable-client-state))))
            |#
 
-  (def flush (fn extern void (void)
-    (glFlush)))
+  (defc flush extern glFlush void (void))
 ))
