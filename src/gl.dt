@@ -1,11 +1,7 @@
 (module gl)
 
-(import bitset-enum)
-
 (import util)
-
-;;;constants
-
+(import bitset-enum)
 
 (namespace gl
 
@@ -122,23 +118,30 @@
     (glGenTextures a (cast (uq gensym) (p int)))
     (move (uq gensym)))))
 
+
+
+(defc-enum bind-texture extern glBindTexture void ((a (enum uint ((texture-1d 0x0DE0)
+                                                                  (texture-2d 0x0DE1)
+                                                                  (texture-3d 0x806F)
+                                                                  (texture-cube-map 0x8513))))
+                                                   (tex Texture)))
+
+(mexit)
+
+
 #|
-(def-enum texture-type ((texture-1d 0x0DE0)
-                        (texture-1d 0x0DE1)
-                        (texture-3d 0x806F)
-                        (texture-cube-map 0x8513)))
 
-(defc-enum bind-texture extern glBindTexture ((a texture-type) (tex texture)))
 
-(def-enum texture-2d-type ((texture-2d 0x0DE1)
-                           (proxy-texture-2d 0x8064)
-                           ;texture-1d-array
-                           ;proxy-texture-1d-array
-                           ;texture-rectangle
-                           ;proxy-texture-rectangle
-                           (texture-cube-map 0x8513)
-
-(defc tex-image-2d extern glTexImage2D ((target texture-mapping) (level glint)
+(defc-enum tex-image-2d extern glTexImage2D ((target (enum ((texture-2d 0x0DE1)
+                                                            (proxy-texture-2d 0x8064)
+                                                            ;texture-1d-array
+                                                            ;proxy-texture-1d-array
+                                                            ;texture-rectangle
+                                                            ;proxy-texture-rectangle
+                                                            (texture-cube-map 0x8513)
+                                                            ;...
+                                                            )))
+                                             (level glint)
 |#
 
 (def glUniform1fv (fn extern-c void ((location int) (count uint) (value (const (p float))))))
