@@ -2,11 +2,11 @@
 
 (import macros)
 (import bitset-enum)
-
-(namespace gl
 (import util)
- #|
-(mfor file ("constants.dt"
+
+(include "constants.dt")
+
+(ignore mfor file ("constants.dt"
             "funcs-gl.dt"
             "funcs-gles1.dt"
             "funcs-gles1-gles2.dt"
@@ -22,52 +22,15 @@
             "funcs-gl-gles2.dt"
             "funcs-gl-gles2-glsc2.dt" 
             )
-  (include file)) |#
+  (include file))
 
-  (def-bitset-enum buffer-bit
-    extern uint
-      ((depth 0x100)
-       (accum 0x200)
-       (stencil 0x400)
-       (color 0x4000)
-       (coverage 0x8000)))
+(namespace gl
 
-  (def-enum capability extern uint
-    ((blend 0xBE2)))
-
-
-
-  (def-enum pname
-    extern uint
-      ((shader-type 0x8B4F)
-       (delete-status 0x8B80)
-       (compile-status 0x8B81)
-       (info-log-length 0x8B84)
-       (shader-source-length 0x8B88)))
-
-
-
-  (def-enum primitive
-     extern uint (points
-                       lines line-loop line-strip
-                       triangles triangle-strip triangle-fan
-                       quads quad-strip
-                       polygon))
-
-  (def-enum type
-    extern uint ((byte 0x1400) ubyte
-                       short ushort
-                       int uint
-                       float
-                       bytes-2 bytes-3 bytes-4
-                       double))
-  (def-enum array
-    extern uint ((vertex-array 0x8074) normal-array color-array index-array texture-coord-array edge-flag-array))
 (using-namespace std.macros
 ;;cfun
 
-(defc enable extern glEnable  void ((a capability)))
-(defc disable extern glDisable void ((a capability)))
+(defc enable extern glEnable  void ((a enum)))
+(defc disable extern glDisable void ((a enum)))
 
 (defc draw-elements extern glDrawElements void ((mode uint) (first int) (count int) (indices (p void))))
 (defc vertex-pointer extern glVertexPointer void ((size int) (type uint) (stride int) (ptr (const (p void)))))
@@ -88,29 +51,6 @@
     (move (uq gensym)))))
 
 
-
-(ignore defc-enum bind-texture extern glBindTexture void ((a (enum uint ((texture-1d 0x0DE0)
-                                                                  (texture-2d 0x0DE1)
-                                                                  (texture-3d 0x806F)
-                                                                  (texture-cube-map 0x8513))))
-                                                   (tex Texture)))
-
-
-
-#|
-
-
-(defc-enum tex-image-2d extern glTexImage2D ((target (enum ((texture-2d 0x0DE1)
-                                                            (proxy-texture-2d 0x8064)
-                                                            ;texture-1d-array
-                                                            ;proxy-texture-1d-array
-                                                            ;texture-rectangle
-                                                            ;proxy-texture-rectangle
-                                                            (texture-cube-map 0x8513)
-                                                            ;...
-                                                            )))
-                                             (level glint)
-|#
 
 (def glUniform1fv (fn extern-c void ((location int) (count uint) (value (const (p float))))))
 (def glUniform2fv (fn extern-c void ((location int) (count uint) (value (const (p float))))))
@@ -182,12 +122,7 @@
 
   (defc get-uniform-location extern glGetUniformLocation Location ((program Program) (name (p (const char)))))
 
-  (def-enum shader
-    extern uint
-      ((fragment 0x8B30)
-       (vertex 0x8B31)))
-
-  (defc create-shader extern glCreateShader Shader ((shader-t shader)))
+  (defc create-shader extern glCreateShader Shader ((shader enum)))
 
   (def shader-source (fn extern void ((the-shader Shader) (str (p (const char))))
     (glShaderSource (@: the-shader value) 1 (# str) (nullptr int))))
@@ -202,7 +137,7 @@
            (attach-shader (uq program) (uql (get-varargs-list (- (arg-count mc) 2)))))))
 
     
-  (def get-shader-iv (macro extern ((the-shader Shader) (aname pname))
+  (def get-shader-iv (macro extern ((the-shader Shader) (aname enum))
     (let ((name \ (make-gensym-var-node mc)))
       (qq do (def (uq name) (var auto int 0))
              (glGetShaderiv (@: (uq the-shader) value) (value (uq aname)) (# (uq name)))
@@ -211,17 +146,17 @@
   (defc link-program extern glLinkProgram void ((program Program)))
   (defc use-program extern glUseProgram void ((program Program)))
 
-  (defc clear extern glClear void ((mask buffer-bit)))
+  (defc clear extern glClear void ((mask enum)))
   (defc-multi vertex extern
     (glVertex3f void ((x float) (y float) (z float))))
-  (defc begin extern glBegin void ((mode primitive)))
+  (defc begin extern glBegin void ((mode enum)))
 
   (defc end extern glEnd void (void))
-  (defc enable-client-state extern glEnableClientState void ((a array)))
+  (defc enable-client-state extern glEnableClientState void ((a enum)))
   (defc disable-client-state extern glDisableClientState void (void))
   (defc flush extern glFlush void (void)) 
-  (defc draw-arrays extern glDrawArrays void ((mode primitive) (first int) (count int)))
-  (def vertex-pointer (macro extern ((size int) (type type) (stride int) ptr)
+  (defc draw-arrays extern glDrawArrays void ((mode enum) (first int) (count int)))
+  (def vertex-pointer (macro extern ((size int) (type enum) (stride int) ptr)
     (qq glVertexPointer (uq size) (value (uq type)) (uq stride) (cast (uq ptr) (p void)))))
 
    #|
