@@ -5,7 +5,7 @@ FLAGS=-M../dale-extensions
 all: libgl.dtm libglut.dtm
 
 libgl.dtm: src/gl.dt
-  dalec -c src/gl.dt $(FLAGS)
+  dalec -c src/gl.dt $(FLAGS) -Igl
 
 libglut.dtm: src/glut.dt
   dalec -c src/glut.dt $(FLAGS)
